@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { API_BASE } from '../config';
 import type { AgentEvent } from '../types';
 
 export function useSSE(sessionId: string | null) {
@@ -19,7 +20,7 @@ export function useSSE(sessionId: string | null) {
     setEvents([]);
     setDone(false);
 
-    const es = new EventSource(`http://localhost:8000/stream/${sessionId}`);
+    const es = new EventSource(`${API_BASE}/stream/${sessionId}`);
     esRef.current = es;
 
     es.onmessage = (e) => {

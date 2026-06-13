@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import { API_BASE } from '../config';
 import type { EvalAgent, EvalRun, EvalsResponse, EvalSessionDetail } from '../types/evals';
 
-const API = 'http://localhost:8000';
+const API = API_BASE;
 
 const AGENT_COLORS: Record<string, string> = {
   log_monitor: 'border-green-800 bg-green-950/50',

@@ -6,9 +6,10 @@ import LogSourceSelector from './components/LogSourceSelector';
 import MetricCard from './components/MetricCard';
 import { useSSE } from './hooks/useSSE';
 import ThreatFindingsPanel from './components/ThreatFindingsPanel';
+import { API_BASE } from './config';
 import type { AnalyzeMeta, SecurityReport } from './types';
 
-const API = 'http://localhost:8000';
+const API = API_BASE;
 
 type Tab = 'dashboard' | 'evals';
 

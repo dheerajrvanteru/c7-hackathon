@@ -10,7 +10,7 @@ npm run dev     # http://localhost:5173
 npm run build
 ```
 
-Backend must be running at `http://localhost:8000` (configured in `src/App.tsx`).
+Backend URL is configured via `VITE_API_URL` (see `src/config.ts` and `.env.example`). Defaults to `http://localhost:8000` for local dev.
 
 ## Dashboard layout
 

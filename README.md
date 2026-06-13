@@ -103,10 +103,20 @@ cd backend && .venv/bin/python -m pytest tests/ -q
 
 39 tests covering agents, GitHub scanner, Terraform patterns, cache, API, and orchestrator.
 
+## Deployment
+
+Deploy the **frontend to Vercel** and the **backend to Railway** (recommended). See [docs/deployment.md](docs/deployment.md) for step-by-step instructions, environment variables, and troubleshooting.
+
+Quick summary:
+
+1. Railway: deploy `backend/` → copy HTTPS URL
+2. Vercel: deploy `frontend/` with `VITE_API_URL=https://your-railway-url`
+
 ## Documentation
 
 | Doc | Description |
 |-----|-------------|
+| [docs/deployment.md](docs/deployment.md) | Vercel frontend + Railway backend deployment |
 | [backend/README.md](backend/README.md) | Backend architecture, patterns, API, and setup |
 | [docs/architecture.md](docs/architecture.md) | System architecture reference |
 | [docs/superpowers/specs/2026-06-12-cybersentinel-ai-design.md](docs/superpowers/specs/2026-06-12-cybersentinel-ai-design.md) | Full design spec |

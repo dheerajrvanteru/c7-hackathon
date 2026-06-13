@@ -7,6 +7,10 @@ import uuid
 from pathlib import Path
 from typing import AsyncGenerator
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
