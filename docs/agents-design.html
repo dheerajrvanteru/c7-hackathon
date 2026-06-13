@@ -1,0 +1,139 @@
+<h2>Agent Design</h2>
+<p class="subtitle">Each agent's role, tools, inputs, and outputs in the shared SecurityState</p>
+
+<div style="display:flex;flex-direction:column;gap:12px;font-size:12px">
+
+  <!-- Log Monitor -->
+  <div style="background:#0d1117;border:1px solid #22c55e;border-radius:8px;padding:14px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:18px">📋</span>
+      <span style="color:#22c55e;font-weight:bold;font-size:13px">Log Monitor Agent</span>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">TOOLS</div>
+        <div style="color:#e6edf3">parse_logs(source)</div>
+        <div style="color:#e6edf3">detect_anomalies(entries)</div>
+        <div style="color:#e6edf3">classify_severity(event)</div>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">DETECTS</div>
+        <div style="color:#e6edf3">SSH brute force, port scans</div>
+        <div style="color:#e6edf3">Failed auth spikes</div>
+        <div style="color:#e6edf3">Unusual traffic patterns</div>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">OUTPUT → STATE</div>
+        <div style="color:#22c55e">anomalies[], severity_map{}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Threat Intel -->
+  <div style="background:#0d1117;border:1px solid #ef4444;border-radius:8px;padding:14px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:18px">🔍</span>
+      <span style="color:#ef4444;font-weight:bold;font-size:13px">Threat Intelligence Agent</span>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">TOOLS</div>
+        <div style="color:#e6edf3">query_nvd_cve(keyword)</div>
+        <div style="color:#e6edf3">lookup_ip_reputation(ip)</div>
+        <div style="color:#e6edf3">match_attack_patterns(anomaly)</div>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">DATA SOURCES</div>
+        <div style="color:#e6edf3">NVD API (real CVE data)</div>
+        <div style="color:#e6edf3">MITRE ATT&CK patterns</div>
+        <div style="color:#e6edf3">AbuseIPDB for IP lookups</div>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">OUTPUT → STATE</div>
+        <div style="color:#ef4444">cve_matches[], threat_score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vuln Scanner -->
+  <div style="background:#0d1117;border:1px solid #8b5cf6;border-radius:8px;padding:14px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:18px">🛡️</span>
+      <span style="color:#8b5cf6;font-weight:bold;font-size:13px">Vulnerability Scanner Agent</span>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">TOOLS</div>
+        <div style="color:#e6edf3">scan_code_snippet(code)</div>
+        <div style="color:#e6edf3">check_api_headers(url)</div>
+        <div style="color:#e6edf3">audit_docker_image(name)</div>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">CHECKS</div>
+        <div style="color:#e6edf3">OWASP Top 10 patterns</div>
+        <div style="color:#e6edf3">Missing security headers</div>
+        <div style="color:#e6edf3">Outdated base images</div>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">OUTPUT → STATE</div>
+        <div style="color:#8b5cf6">vulnerabilities[], risk_level</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incident Response -->
+  <div style="background:#0d1117;border:1px solid #f59e0b;border-radius:8px;padding:14px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:18px">🚨</span>
+      <span style="color:#f59e0b;font-weight:bold;font-size:13px">Incident Response Agent</span>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">TOOLS</div>
+        <div style="color:#e6edf3">generate_action_plan(findings)</div>
+        <div style="color:#e6edf3">prioritize_threats(list)</div>
+        <div style="color:#e6edf3">draft_runbook(incident)</div>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">READS FROM STATE</div>
+        <div style="color:#e6edf3">anomalies, cve_matches</div>
+        <div style="color:#e6edf3">vulnerabilities, threat_score</div>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">OUTPUT → STATE</div>
+        <div style="color:#f59e0b">action_plan[], runbook_md</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Policy Checker -->
+  <div style="background:#0d1117;border:1px solid #06b6d4;border-radius:8px;padding:14px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      <span style="font-size:18px">📜</span>
+      <span style="color:#06b6d4;font-weight:bold;font-size:13px">Policy Checker Agent</span>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">TOOLS</div>
+        <div style="color:#e6edf3">check_nist_compliance(findings)</div>
+        <div style="color:#e6edf3">check_soc2_controls(findings)</div>
+        <div style="color:#e6edf3">generate_compliance_report()</div>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">STANDARDS</div>
+        <div style="color:#e6edf3">NIST CSF 2.0</div>
+        <div style="color:#e6edf3">SOC 2 Type II controls</div>
+        <div style="color:#e6edf3">ISO 27001 basics</div>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <div style="color:#4a5568;font-size:10px;margin-bottom:4px">OUTPUT → STATE</div>
+        <div style="color:#06b6d4">compliance_gaps[], score%</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:16px;padding:12px;background:#1a2030;border-radius:8px;border-left:3px solid #3b82f6">
+  <p style="color:#94a3b8;margin:0;font-size:12px">Does each agent's scope feel right? Any tools to add or remove? Reply in the terminal.</p>
+</div>

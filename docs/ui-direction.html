@@ -1,0 +1,74 @@
+<h2>What should the UI look like?</h2>
+<p class="subtitle">Pick the visual direction that fits the demo best</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0a0a0f;border-radius:8px;padding:16px;font-family:monospace;font-size:11px;color:#00ff88;min-height:140px">
+        <div style="color:#888;margin-bottom:8px">▶ THREAT MONITOR — LIVE</div>
+        <div style="color:#ff4444">⚠ [CRITICAL] SSH brute force detected — 192.168.1.42</div>
+        <div style="color:#ffaa00">⚡ [WARN] Port scan in progress — 10.0.0.5</div>
+        <div style="color:#00ff88">✓ [OK] Log ingestion running — 1,240 events/min</div>
+        <div style="margin-top:10px;color:#888">Agent Status:</div>
+        <div>🟢 LogMonitor &nbsp; 🟢 ThreatIntel &nbsp; 🟡 VulnScanner</div>
+        <div>🟢 IncidentResp &nbsp; 🟢 PolicyChecker</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Terminal / SOC Dashboard</h3>
+      <p>Dark theme, real-time log stream, agent status indicators. Feels like a real Security Operations Center. High impact for demos.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1a1f2e;border-radius:8px;padding:16px;min-height:140px">
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <div style="background:#252d40;border-radius:6px;padding:10px;flex:1;text-align:center">
+            <div style="color:#ff4444;font-size:20px;font-weight:bold">3</div>
+            <div style="color:#888;font-size:10px">Critical Threats</div>
+          </div>
+          <div style="background:#252d40;border-radius:6px;padding:10px;flex:1;text-align:center">
+            <div style="color:#ffaa00;font-size:20px;font-weight:bold">12</div>
+            <div style="color:#888;font-size:10px">Warnings</div>
+          </div>
+          <div style="background:#252d40;border-radius:6px;padding:10px;flex:1;text-align:center">
+            <div style="color:#00cc88;font-size:20px;font-weight:bold">5</div>
+            <div style="color:#888;font-size:10px">Agents Active</div>
+          </div>
+        </div>
+        <div style="background:#252d40;border-radius:6px;padding:10px">
+          <div style="color:#aaa;font-size:11px;margin-bottom:6px">Agent Activity Feed</div>
+          <div style="color:#00cc88;font-size:11px">→ ThreatIntel matched CVE-2024-1234</div>
+          <div style="color:#6699ff;font-size:11px">→ IncidentResponse drafted remediation plan</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Modern Analytics Dashboard</h3>
+      <p>Cards, charts, metrics panels. Clean and professional. Shows security posture at a glance with agent activity feed.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0f172a;border-radius:8px;padding:16px;min-height:140px;font-size:11px">
+        <div style="color:#94a3b8;margin-bottom:10px">Upload logs or select source:</div>
+        <div style="display:flex;gap:6px;margin-bottom:12px">
+          <div style="background:#1e3a5f;border:1px solid #3b82f6;border-radius:4px;padding:6px 10px;color:#60a5fa">📁 Upload File</div>
+          <div style="background:#1a2744;border-radius:4px;padding:6px 10px;color:#94a3b8">System Logs</div>
+          <div style="background:#1a2744;border-radius:4px;padding:6px 10px;color:#94a3b8">Synthetic</div>
+        </div>
+        <div style="color:#94a3b8;margin-bottom:6px">Analyzing with 5 agents...</div>
+        <div style="background:#1e293b;border-radius:4px;padding:8px;border-left:3px solid #3b82f6">
+          <div style="color:#60a5fa;margin-bottom:4px">🤖 Incident Response Agent</div>
+          <div style="color:#cbd5e1">Detected brute force attack. Recommended action: block IP 192.168.1.42, rotate SSH keys, enable 2FA...</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Chat / Wizard Interface</h3>
+      <p>Step-by-step flow: choose source → agents analyze → results appear as AI responses. Emphasizes the AI conversation aspect.</p>
+    </div>
+  </div>
+</div>

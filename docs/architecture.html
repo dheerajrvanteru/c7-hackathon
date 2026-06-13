@@ -1,0 +1,91 @@
+<h2>System Architecture</h2>
+<p class="subtitle">LangGraph State Machine — does this match your mental model?</p>
+
+<div style="font-family:monospace;font-size:12px;background:#0d1117;border-radius:10px;padding:24px;color:#e6edf3">
+
+  <!-- Frontend -->
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="display:inline-block;background:#1f2d3d;border:1px solid #3b82f6;border-radius:8px;padding:10px 32px;color:#60a5fa;font-weight:bold">
+      🖥️ React Dashboard (Vite + TailwindCSS)
+    </div>
+    <div style="color:#4a5568;font-size:10px;margin-top:4px">Metrics cards · Agent feed · Log source selector · Incident reports</div>
+  </div>
+
+  <!-- Arrow down -->
+  <div style="text-align:center;color:#4a5568;margin-bottom:8px">⬇ HTTP / Server-Sent Events (SSE)</div>
+
+  <!-- FastAPI -->
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="display:inline-block;background:#1a2744;border:1px solid #6366f1;border-radius:8px;padding:10px 32px;color:#a5b4fc;font-weight:bold">
+      ⚡ FastAPI Backend
+    </div>
+    <div style="color:#4a5568;font-size:10px;margin-top:4px">/analyze · /stream · /report · /agents/status</div>
+  </div>
+
+  <!-- Arrow down -->
+  <div style="text-align:center;color:#4a5568;margin-bottom:8px">⬇ triggers</div>
+
+  <!-- LangGraph Orchestrator -->
+  <div style="border:1px dashed #374151;border-radius:10px;padding:16px;margin-bottom:20px">
+    <div style="text-align:center;color:#f59e0b;font-weight:bold;margin-bottom:16px">🔁 LangGraph SecurityOrchestrator</div>
+
+    <!-- Agent flow -->
+    <div style="display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap">
+      <div style="background:#1a2e1a;border:1px solid #22c55e;border-radius:6px;padding:8px 10px;text-align:center;min-width:90px">
+        <div style="color:#22c55e;font-size:16px">📋</div>
+        <div style="color:#22c55e;font-size:10px;font-weight:bold">Log Monitor</div>
+        <div style="color:#4a5568;font-size:9px">parse · detect</div>
+      </div>
+      <div style="color:#f59e0b">→</div>
+      <div style="background:#2a1a1a;border:1px solid #ef4444;border-radius:6px;padding:8px 10px;text-align:center;min-width:90px">
+        <div style="color:#ef4444;font-size:16px">🔍</div>
+        <div style="color:#ef4444;font-size:10px;font-weight:bold">Threat Intel</div>
+        <div style="color:#4a5568;font-size:9px">CVE · NVD lookup</div>
+      </div>
+      <div style="color:#f59e0b">→</div>
+      <div style="background:#1a1a2e;border:1px solid #8b5cf6;border-radius:6px;padding:8px 10px;text-align:center;min-width:90px">
+        <div style="color:#8b5cf6;font-size:16px">🛡️</div>
+        <div style="color:#8b5cf6;font-size:10px;font-weight:bold">Vuln Scanner</div>
+        <div style="color:#4a5568;font-size:9px">code · API · Docker</div>
+      </div>
+      <div style="color:#f59e0b">→</div>
+      <div style="background:#2a1f0a;border:1px solid #f59e0b;border-radius:6px;padding:8px 10px;text-align:center;min-width:90px">
+        <div style="color:#f59e0b;font-size:16px">🚨</div>
+        <div style="color:#f59e0b;font-size:10px;font-weight:bold">Incident Resp.</div>
+        <div style="color:#4a5568;font-size:9px">action plan</div>
+      </div>
+      <div style="color:#f59e0b">→</div>
+      <div style="background:#0a1f2a;border:1px solid #06b6d4;border-radius:6px;padding:8px 10px;text-align:center;min-width:90px">
+        <div style="color:#06b6d4;font-size:16px">📜</div>
+        <div style="color:#06b6d4;font-size:10px;font-weight:bold">Policy Checker</div>
+        <div style="color:#4a5568;font-size:9px">ISO · NIST · SOC2</div>
+      </div>
+    </div>
+
+    <!-- Shared state label -->
+    <div style="text-align:center;margin-top:12px;color:#4a5568;font-size:10px">
+      ↕ all agents read/write shared <span style="color:#f59e0b">SecurityState</span>
+    </div>
+  </div>
+
+  <!-- Data sources + OpenAI row -->
+  <div style="display:flex;gap:12px;justify-content:center">
+    <div style="background:#111827;border:1px solid #374151;border-radius:8px;padding:10px 14px;text-align:center;flex:1;max-width:180px">
+      <div style="color:#9ca3af;font-size:11px;font-weight:bold">📂 Log Sources</div>
+      <div style="color:#4a5568;font-size:10px;margin-top:4px">Synthetic · System · Upload</div>
+    </div>
+    <div style="background:#111827;border:1px solid #374151;border-radius:8px;padding:10px 14px;text-align:center;flex:1;max-width:180px">
+      <div style="color:#9ca3af;font-size:11px;font-weight:bold">🧠 OpenRouter (gpt-4o)</div>
+      <div style="color:#4a5568;font-size:10px;margin-top:4px">Agent reasoning · Tool calls</div>
+    </div>
+    <div style="background:#111827;border:1px solid #374151;border-radius:8px;padding:10px 14px;text-align:center;flex:1;max-width:180px">
+      <div style="color:#9ca3af;font-size:11px;font-weight:bold">🌐 External APIs</div>
+      <div style="color:#4a5568;font-size:10px;margin-top:4px">NVD · CVE · NIST feeds</div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:20px;padding:14px;background:#1a2030;border-radius:8px;border-left:3px solid #3b82f6">
+  <p style="color:#94a3b8;margin:0;font-size:13px">Does this architecture look right? Reply in the terminal to confirm or request changes.</p>
+</div>

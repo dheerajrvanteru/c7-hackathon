@@ -1,0 +1,93 @@
+<h2>Data Flow</h2>
+<p class="subtitle">How a log analysis request travels through the system end-to-end</p>
+
+<div style="font-family:monospace;font-size:11px;color:#e6edf3">
+
+  <!-- Step 1 -->
+  <div style="display:flex;gap:12px;margin-bottom:8px;align-items:flex-start">
+    <div style="background:#1f3a5f;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#60a5fa;font-weight:bold;flex-shrink:0">1</div>
+    <div style="background:#0d1117;border:1px solid #1f2937;border-radius:8px;padding:10px;flex:1">
+      <div style="color:#60a5fa;font-weight:bold;margin-bottom:4px">User selects log source in Dashboard</div>
+      <div style="color:#6b7280">Synthetic demo · Local /var/log · Upload .log file</div>
+      <div style="color:#374151;margin-top:4px">POST /analyze  { source: "synthetic" | "system" | "upload", file?: bytes }</div>
+    </div>
+  </div>
+  <div style="margin-left:12px;color:#374151;margin-bottom:8px">↓</div>
+
+  <!-- Step 2 -->
+  <div style="display:flex;gap:12px;margin-bottom:8px;align-items:flex-start">
+    <div style="background:#1f3a5f;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#60a5fa;font-weight:bold;flex-shrink:0">2</div>
+    <div style="background:#0d1117;border:1px solid #1f2937;border-radius:8px;padding:10px;flex:1">
+      <div style="color:#a5b4fc;font-weight:bold;margin-bottom:4px">FastAPI creates SecurityState + starts SSE stream</div>
+      <div style="color:#6b7280">Returns session_id immediately. Dashboard opens GET /stream/{session_id} (SSE).</div>
+      <div style="color:#374151;margin-top:4px">SecurityState = { logs[], anomalies[], cve_matches[], vulnerabilities[], action_plan[], compliance_gaps[] }</div>
+    </div>
+  </div>
+  <div style="margin-left:12px;color:#374151;margin-bottom:8px">↓</div>
+
+  <!-- Step 3 -->
+  <div style="display:flex;gap:12px;margin-bottom:8px;align-items:flex-start">
+    <div style="background:#1f3a5f;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#60a5fa;font-weight:bold;flex-shrink:0">3</div>
+    <div style="background:#0d1117;border:1px solid #22c55e;border-radius:8px;padding:10px;flex:1">
+      <div style="color:#22c55e;font-weight:bold;margin-bottom:4px">📋 Log Monitor Agent runs</div>
+      <div style="color:#6b7280">Parses raw logs → detects anomalies → classifies severity</div>
+      <div style="color:#374151;margin-top:4px">Emits SSE: { agent: "log_monitor", status: "running" | "done", findings: [...] }</div>
+    </div>
+  </div>
+  <div style="margin-left:12px;color:#374151;margin-bottom:8px">↓  state.anomalies populated</div>
+
+  <!-- Step 4 -->
+  <div style="display:flex;gap:12px;margin-bottom:8px;align-items:flex-start">
+    <div style="background:#1f3a5f;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#60a5fa;font-weight:bold;flex-shrink:0">4</div>
+    <div style="background:#0d1117;border:1px solid #ef4444;border-radius:8px;padding:10px;flex:1">
+      <div style="color:#ef4444;font-weight:bold;margin-bottom:4px">🔍 Threat Intel Agent runs</div>
+      <div style="color:#6b7280">Reads anomalies → queries NVD API → checks IP reputation → maps MITRE ATT&CK</div>
+      <div style="color:#374151;margin-top:4px">Emits SSE: { agent: "threat_intel", cve_matches: [...], threat_score: 0-100 }</div>
+    </div>
+  </div>
+  <div style="margin-left:12px;color:#374151;margin-bottom:8px">↓  state.cve_matches + threat_score populated</div>
+
+  <!-- Step 5 -->
+  <div style="display:flex;gap:12px;margin-bottom:8px;align-items:flex-start">
+    <div style="background:#1f3a5f;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#60a5fa;font-weight:bold;flex-shrink:0">5</div>
+    <div style="background:#0d1117;border:1px solid #8b5cf6;border-radius:8px;padding:10px;flex:1">
+      <div style="color:#8b5cf6;font-weight:bold;margin-bottom:4px">🛡️ Vuln Scanner Agent runs</div>
+      <div style="color:#6b7280">Checks OWASP patterns, missing headers, Docker image age</div>
+      <div style="color:#374151;margin-top:4px">Emits SSE: { agent: "vuln_scanner", vulnerabilities: [...], risk_level: "low|medium|high|critical" }</div>
+    </div>
+  </div>
+  <div style="margin-left:12px;color:#374151;margin-bottom:8px">↓  state.vulnerabilities populated</div>
+
+  <!-- Step 6 -->
+  <div style="display:flex;gap:12px;margin-bottom:8px;align-items:flex-start">
+    <div style="background:#1f3a5f;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#60a5fa;font-weight:bold;flex-shrink:0">6</div>
+    <div style="background:#0d1117;border:1px solid #f59e0b;border-radius:8px;padding:10px;flex:1">
+      <div style="color:#f59e0b;font-weight:bold;margin-bottom:4px">🚨 Incident Response Agent runs</div>
+      <div style="color:#6b7280">Reads ALL prior findings → GPT-4o generates prioritized action plan + markdown runbook</div>
+      <div style="color:#374151;margin-top:4px">Emits SSE: { agent: "incident_response", action_plan: [...], runbook_md: "..." }</div>
+    </div>
+  </div>
+  <div style="margin-left:12px;color:#374151;margin-bottom:8px">↓  state.action_plan + runbook populated</div>
+
+  <!-- Step 7 -->
+  <div style="display:flex;gap:12px;margin-bottom:8px;align-items:flex-start">
+    <div style="background:#1f3a5f;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#60a5fa;font-weight:bold;flex-shrink:0">7</div>
+    <div style="background:#0d1117;border:1px solid #06b6d4;border-radius:8px;padding:10px;flex:1">
+      <div style="color:#06b6d4;font-weight:bold;margin-bottom:4px">📜 Policy Checker Agent runs</div>
+      <div style="color:#6b7280">Maps all findings to NIST/SOC2/ISO gaps → generates compliance score</div>
+      <div style="color:#374151;margin-top:4px">Emits SSE: { agent: "policy_checker", compliance_gaps: [...], score: 72 }</div>
+    </div>
+  </div>
+  <div style="margin-left:12px;color:#374151;margin-bottom:8px">↓  analysis complete</div>
+
+  <!-- Step 8 -->
+  <div style="display:flex;gap:12px;align-items:flex-start">
+    <div style="background:#1f3a5f;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#60a5fa;font-weight:bold;flex-shrink:0">8</div>
+    <div style="background:#0d1117;border:1px solid #3b82f6;border-radius:8px;padding:10px;flex:1">
+      <div style="color:#3b82f6;font-weight:bold;margin-bottom:4px">Dashboard renders final report</div>
+      <div style="color:#6b7280">All metrics cards update · Agent feed complete · Incident report + compliance report available for download</div>
+      <div style="color:#374151;margin-top:4px">GET /report/{session_id} → full JSON report</div>
+    </div>
+  </div>
+
+</div>
