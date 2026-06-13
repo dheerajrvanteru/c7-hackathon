@@ -1,3 +1,5 @@
+"""Tests for ``SecurityState`` initialization."""
+
 from state import make_initial_state
 
 

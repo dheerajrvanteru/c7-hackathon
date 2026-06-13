@@ -53,6 +53,8 @@ AGENT_CACHE_INFO = {
 
 @dataclass
 class LlmCallRecord:
+    """Single LLM invocation metrics stored for one agent in a session."""
+
     model: str
     input_tokens: int
     output_tokens: int
@@ -65,6 +67,8 @@ class LlmCallRecord:
 
 @dataclass
 class AgentEvalRecord:
+    """Aggregated eval data for one pipeline agent in a session."""
+
     agent: str
     latency_ms: float = 0.0
     llm_calls: list[LlmCallRecord] = field(default_factory=list)
@@ -73,6 +77,8 @@ class AgentEvalRecord:
 
 @dataclass
 class SessionEvalRecord:
+    """Top-level eval record for one analysis run."""
+
     session_id: str
     log_source: str
     line_count: int = 0
@@ -84,6 +90,7 @@ class SessionEvalRecord:
     agents: dict[str, AgentEvalRecord] = field(default_factory=dict)
 
     def agent_record(self, agent: str) -> AgentEvalRecord:
+        """Get or create the eval record for a named agent."""
         if agent not in self.agents:
             self.agents[agent] = AgentEvalRecord(agent=agent)
         return self.agents[agent]
@@ -99,6 +106,7 @@ def begin_session(
     line_count: int = 0,
     used_fallback: bool = False,
 ) -> SessionEvalRecord:
+    """Register a new session for eval tracking."""
     record = SessionEvalRecord(
         session_id=session_id,
         log_source=log_source,
@@ -111,10 +119,12 @@ def begin_session(
 
 
 def get_session(session_id: str) -> SessionEvalRecord | None:
+    """Return the eval record for a session, if registered."""
     return _store.get(session_id)
 
 
 def record_agent_latency(session_id: str, agent: str, latency_ms: float) -> None:
+    """Store wall-clock latency for an agent node execution."""
     rec = _store.get(session_id)
     if not rec:
         return
@@ -123,6 +133,7 @@ def record_agent_latency(session_id: str, agent: str, latency_ms: float) -> None
 
 
 def record_agent_error(session_id: str, agent: str) -> None:
+    """Mark an agent as failed for eval reporting."""
     rec = _store.get(session_id)
     if not rec:
         return
@@ -139,6 +150,7 @@ def record_llm_call(
     latency_ms: float,
     cache_hit: bool,
 ) -> None:
+    """Append LLM call metrics to the session eval record."""
     rec = _store.get(session_id)
     if not rec:
         return
@@ -157,18 +169,21 @@ def record_llm_call(
 
 
 def finish_session(session_id: str) -> None:
+    """Set completion timestamp on a session eval record."""
     rec = _store.get(session_id)
     if rec:
         rec.completed_at = datetime.now(timezone.utc).isoformat()
 
 
 def _normalize_model(model: str) -> str:
+    """Strip OpenRouter provider prefix for pricing lookup."""
     if model.startswith("openai/"):
         return model.split("/", 1)[1]
     return model
 
 
 def _agent_to_dict(agent: str, entry: AgentEvalRecord) -> dict[str, Any]:
+    """Serialize one agent's eval record for the API response."""
     agent_type = AGENT_TYPES.get(agent, "deterministic")
     cache_info = dict(AGENT_CACHE_INFO.get(agent, {"strategy": "none", "reason": ""}))
 
@@ -218,6 +233,7 @@ def _agent_to_dict(agent: str, entry: AgentEvalRecord) -> dict[str, Any]:
 
 
 def _build_summary(record: SessionEvalRecord) -> dict[str, Any]:
+    """Compute session-level token, cost, latency, and cache summaries."""
     agents_data = []
     for agent in AGENT_TYPES:
         if agent in record.agents:
@@ -281,6 +297,7 @@ def _build_summary(record: SessionEvalRecord) -> dict[str, Any]:
 
 
 def session_to_dict(session_id: str) -> dict[str, Any] | None:
+    """Return full eval payload for a session, or ``None`` if unknown."""
     record = _store.get(session_id)
     if not record:
         return None
@@ -321,6 +338,7 @@ def session_to_dict(session_id: str) -> dict[str, Any] | None:
 
 
 def list_all_evals() -> dict[str, Any]:
+    """Return all session evals with an overall aggregate summary."""
     runs = []
     total_cost = 0.0
     total_saved = 0.0

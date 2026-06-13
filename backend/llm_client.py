@@ -19,6 +19,8 @@ from eval_tracker import EvalTracker
 
 @dataclass
 class CallMeta:
+    """Token, latency, and cache metadata returned from ``CachingLLMClient.chat``."""
+
     input_tokens: int
     output_tokens: int
     latency_ms: float
@@ -39,6 +41,7 @@ class CachingLLMClient:
         tracker: EvalTracker | None = None,
         run_label: str = "",
     ):
+        """Configure OpenAI client, optional cache, and eval tracker."""
         self._client = OpenAI(
             api_key=api_key or os.environ.get("OPENAI_API_KEY", ""),
             base_url=base_url,   # set to OpenRouter URL for that path

@@ -1,3 +1,5 @@
+"""Threat Intel agent — enriches anomalies with CVE and IP reputation data."""
+
 from state import SecurityState
 from tools.abuseipdb import check_ip_reputation
 from tools.nvd_api import search_nvd_cve
@@ -11,6 +13,14 @@ ANOMALY_KEYWORDS = {
 
 
 def run_threat_intel(state: SecurityState) -> SecurityState:
+    """Look up CVEs and IP reputation for each anomaly and compute threat score.
+
+    Args:
+        state: Pipeline state with ``anomalies`` populated.
+
+    Returns:
+        Updated state with ``cve_matches`` and ``threat_score`` (0–100).
+    """
     anomalies = state["anomalies"]
     cve_matches = []
     ip_scores = []

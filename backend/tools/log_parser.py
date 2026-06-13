@@ -1,3 +1,5 @@
+"""Log parsing and anomaly detection for SSH, nginx, and sudo events."""
+
 import re
 from collections import defaultdict
 
@@ -40,6 +42,7 @@ ANOMALY_META: dict[str, dict[str, str]] = {
 
 
 def _enrich_anomaly(anomaly: dict) -> dict:
+    """Attach human-readable title and remediation text to an anomaly dict."""
     meta = ANOMALY_META.get(anomaly["type"], {})
     return {
         **anomaly,
@@ -51,6 +54,14 @@ def _enrich_anomaly(anomaly: dict) -> dict:
 
 
 def parse_log_line(line: str) -> dict:
+    """Parse a single log line into a structured event dict.
+
+    Args:
+        line: Raw log line from syslog, auth.log, or similar sources.
+
+    Returns:
+        Event with ``type`` and type-specific fields, or ``info`` if unmatched.
+    """
     if m := SSH_FAIL_RE.search(line):
         return {
             "type": "ssh_failure",
@@ -76,6 +87,16 @@ def parse_log_line(line: str) -> dict:
 
 
 def detect_anomalies(events: list[dict]) -> list[dict]:
+    """Aggregate parsed events into security anomalies with severity and remediation.
+
+    SSH failures from the same IP (≥3) are escalated to ``brute_force`` CRITICAL.
+
+    Args:
+        events: Output of :func:`parse_log_line` for each log line.
+
+    Returns:
+        List of enriched anomaly dicts ready for downstream agents.
+    """
     anomalies = []
     ip_failures: dict[str, int] = defaultdict(int)
 

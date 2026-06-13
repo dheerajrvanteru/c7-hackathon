@@ -1,3 +1,5 @@
+"""Tests for the LangGraph orchestrator end-to-end pipeline."""
+
 import json
 from unittest.mock import patch
 

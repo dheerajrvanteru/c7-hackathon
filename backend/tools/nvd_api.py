@@ -1,3 +1,5 @@
+"""NVD CVE API client for threat intelligence lookups."""
+
 import os
 
 import httpx
@@ -6,7 +8,15 @@ NVD_BASE = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 
 
 def search_nvd_cve(keyword: str) -> list[dict]:
-    """Search NVD for CVEs matching keyword. Returns list of simplified CVE dicts."""
+    """Search NVD for CVEs matching a keyword.
+
+    Args:
+        keyword: Search term derived from anomaly type (e.g. ``SSH brute force``).
+
+    Returns:
+        Up to five simplified CVE dicts with ``id``, ``description``, and
+        ``cvss_score``. Returns an empty list on API failure.
+    """
     params = {"keywordSearch": keyword, "resultsPerPage": 5}
     headers = {}
     api_key = os.getenv("NVD_API_KEY")

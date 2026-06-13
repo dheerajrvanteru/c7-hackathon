@@ -28,6 +28,8 @@ def compute_cost(model: str, input_tokens: int, output_tokens: int) -> float:
 
 @dataclass
 class CallRecord:
+    """Metrics captured for a single LLM API call."""
+
     agent: str
     model: str
     input_tokens: int
@@ -39,7 +41,10 @@ class CallRecord:
 
 
 class EvalTracker:
+    """Accumulates per-call LLM metrics for benchmark comparison."""
+
     def __init__(self):
+        """Initialize an empty call record list."""
         self.records: list[CallRecord] = []
 
     def record(
@@ -52,6 +57,7 @@ class EvalTracker:
         cache_hit: bool,
         run_label: str = "",
     ) -> CallRecord:
+        """Append a call record; cache hits are recorded with zero cost."""
         cost = 0.0 if cache_hit else compute_cost(model, input_tokens, output_tokens)
         rec = CallRecord(
             agent=agent,
@@ -95,6 +101,7 @@ class EvalTracker:
         return result
 
     def print_comparison_table(self) -> None:
+        """Print call-by-call and summary tables to stdout."""
         summary = self.summary_by_label()
         if not summary:
             print("No records yet.")
@@ -128,6 +135,7 @@ class EvalTracker:
         print("  " + "─" * 66)
 
         def row(name: str, *vals):
+            """Format one summary table row."""
             line = f"  {name:<28}"
             for v in vals:
                 line += f"  {v:>16}"

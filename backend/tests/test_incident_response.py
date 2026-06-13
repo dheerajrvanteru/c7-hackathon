@@ -1,3 +1,5 @@
+"""Tests for Incident Response prompt building, LLM calls, and fallback plans."""
+
 from unittest.mock import patch
 
 from agents.incident_response import (

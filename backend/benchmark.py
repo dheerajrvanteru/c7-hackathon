@@ -106,11 +106,13 @@ class MockLLMClient:
     """Simulates API calls without a real key. Used with --dry-run."""
 
     def __init__(self, cache: LLMCache | None, tracker: EvalTracker, run_label: str):
+        """Configure mock client with shared cache and eval tracker."""
         self._cache = cache
         self._tracker = tracker
         self.run_label = run_label
 
     def chat(self, agent: str, model: str, messages: list[dict], **_):
+        """Simulate an LLM chat completion with optional cache lookup."""
         from llm_cache import CacheEntry
 
         if self._cache is not None:
@@ -163,6 +165,7 @@ class MockLLMClient:
                                   latency_ms=latency_ms, cache_hit=False)
 
     def extract_text(self, response: dict) -> str:
+        """Extract assistant message text from a mock response dict."""
         try:
             return response["choices"][0]["message"]["content"]
         except (KeyError, IndexError):
@@ -172,6 +175,7 @@ class MockLLMClient:
 # ── Runner ───────────────────────────────────────────────────────────────────
 
 def run_pipeline(client, model: str, label: str) -> None:
+    """Run all agent prompts through the given client and print per-call stats."""
     print(f"\n  ▶ Running pipeline [{label}] ...")
     for spec in AGENT_PROMPTS:
         messages = [
@@ -194,6 +198,7 @@ def run_pipeline(client, model: str, label: str) -> None:
 
 
 def main():
+    """CLI entry point: uncached vs cached benchmark comparison."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="gpt-4o-mini")
     parser.add_argument("--dry-run", action="store_true",

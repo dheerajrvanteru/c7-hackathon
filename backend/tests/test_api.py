@@ -1,3 +1,5 @@
+"""Tests for FastAPI analysis endpoints and report retrieval."""
+
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient

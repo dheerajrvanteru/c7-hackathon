@@ -1,3 +1,5 @@
+"""AbuseIPDB client for IP reputation lookups."""
+
 import os
 
 import httpx
@@ -6,7 +8,15 @@ ABUSEIPDB_BASE = "https://api.abuseipdb.com/api/v2/check"
 
 
 def check_ip_reputation(ip: str) -> dict:
-    """Check IP reputation via AbuseIPDB. Returns score and flagged status."""
+    """Check IP reputation via AbuseIPDB.
+
+    Args:
+        ip: IPv4 address to look up.
+
+    Returns:
+        Dict with ``score`` (0–100), ``flagged`` bool, and optional ``country``
+        or ``note`` when the API is unavailable.
+    """
     api_key = os.getenv("ABUSEIPDB_API_KEY", "")
     if not api_key:
         return {"score": 0, "flagged": False, "note": "no api key"}

@@ -1,3 +1,5 @@
+"""FastAPI application — analysis endpoints, SSE streaming, and eval API."""
+
 import asyncio
 import json
 import platform
@@ -27,10 +29,13 @@ SYNTHETIC_LOGS_PATH = Path(__file__).parent / "data" / "synthetic_logs.json"
 
 
 class AnalyzeRequest(BaseModel):
+    """Request body for ``POST /analyze``."""
+
     source: str
 
 
 def _load_synthetic_logs() -> list[str]:
+    """Load bundled synthetic log lines from ``data/synthetic_logs.json``."""
     return json.loads(SYNTHETIC_LOGS_PATH.read_text())
 
 
@@ -43,6 +48,11 @@ SYSTEM_LOG_PATHS = [
 
 
 def _load_system_logs() -> tuple[list[str], dict]:
+    """Read recent lines from OS log files, falling back to synthetic logs.
+
+    Returns:
+        Tuple of log lines and metadata describing what was loaded.
+    """
     logs: list[str] = []
     loaded_from: list[str] = []
 
@@ -76,6 +86,11 @@ def _load_system_logs() -> tuple[list[str], dict]:
 
 
 def _load_logs_for_source(source: str) -> tuple[list[str], dict]:
+    """Resolve log lines for ``synthetic`` or ``system`` sources.
+
+    Raises:
+        HTTPException: When ``source`` is not supported (use upload endpoint).
+    """
     if source == "synthetic":
         logs = _load_synthetic_logs()
         return logs, {
@@ -94,6 +109,7 @@ async def _run_analysis_background(
     session_id: str,
     github_repo: str = "",
 ) -> None:
+    """Run the LangGraph pipeline in a thread and emit completion events."""
     _running.add(session_id)
     try:
         state = await asyncio.to_thread(
@@ -114,6 +130,11 @@ def _start_analysis(
     log_meta: dict | None = None,
     github_repo: str = "",
 ) -> tuple[str, dict]:
+    """Create a session, register eval tracking, and queue background analysis.
+
+    Returns:
+        ``(session_id, metadata)`` for the API response.
+    """
     session_id = str(uuid.uuid4())
     create_session(session_id)
     begin_session(
@@ -133,6 +154,8 @@ def _start_analysis(
 
 
 class GitHubAnalyzeRequest(BaseModel):
+    """Request body for ``POST /analyze/github``."""
+
     repo_url: str
     include_logs: bool = False
     log_source: str = "synthetic"
@@ -140,6 +163,7 @@ class GitHubAnalyzeRequest(BaseModel):
 
 @app.post("/analyze")
 async def analyze(request: AnalyzeRequest, background_tasks: BackgroundTasks):
+    """Start log analysis from synthetic or system log sources."""
     logs, log_meta = _load_logs_for_source(request.source)
     session_id, meta = _start_analysis(
         logs, request.source, background_tasks, log_meta
@@ -151,6 +175,7 @@ async def analyze(request: AnalyzeRequest, background_tasks: BackgroundTasks):
 async def analyze_upload(
     background_tasks: BackgroundTasks, file: UploadFile = File(...)
 ):
+    """Start analysis from an uploaded ``.log`` or ``.txt`` file (max 10 MB)."""
     content = await file.read()
     if len(content) > 10 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File too large (max 10MB)")
@@ -170,6 +195,7 @@ async def analyze_upload(
 async def analyze_github(
     request: GitHubAnalyzeRequest, background_tasks: BackgroundTasks
 ):
+    """Start GitHub repository static analysis, optionally combined with logs."""
     from tools.github_scanner import parse_github_url
 
     try:
@@ -204,6 +230,7 @@ async def analyze_github(
 
 @app.get("/stream/{session_id}")
 async def stream(session_id: str):
+    """Server-sent events stream of agent progress for a session."""
     q = get_queue(session_id)
     if not q:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -220,6 +247,7 @@ async def stream(session_id: str):
 
 @app.get("/report/{session_id}")
 async def get_report(session_id: str):
+    """Return the final pipeline state and session metadata."""
     state = _sessions.get(session_id)
     if not state:
         raise HTTPException(status_code=404, detail="Session not found or still running")
@@ -229,6 +257,7 @@ async def get_report(session_id: str):
 
 @app.get("/agents/status/{session_id}")
 async def agents_status(session_id: str):
+    """Return per-agent status strings for dashboard polling."""
     status = get_agent_status(session_id)
     if not status:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -237,11 +266,13 @@ async def agents_status(session_id: str):
 
 @app.get("/evals")
 async def get_all_evals():
+    """List eval metrics for all completed analysis sessions."""
     return list_all_evals()
 
 
 @app.get("/evals/{session_id}")
 async def get_session_evals(session_id: str):
+    """Return detailed eval metrics for a single session."""
     detail = session_to_dict(session_id)
     if not detail:
         raise HTTPException(status_code=404, detail="Eval data not found for session")

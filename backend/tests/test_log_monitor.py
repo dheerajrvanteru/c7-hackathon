@@ -1,3 +1,5 @@
+"""Tests for log line parsing and Log Monitor agent."""
+
 from tools.log_parser import detect_anomalies, parse_log_line
 from agents.log_monitor import run_log_monitor
 from state import make_initial_state

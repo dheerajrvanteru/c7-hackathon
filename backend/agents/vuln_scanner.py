@@ -1,3 +1,5 @@
+"""Vuln Scanner agent — OWASP mapping, HTTP headers, and GitHub code analysis."""
+
 from tools.github_scanner import scan_github_repo_safe
 from state import SecurityState
 
@@ -45,6 +47,14 @@ REQUIRED_HEADERS = [
 
 
 def scan_for_owasp(anomalies: list[dict]) -> list[dict]:
+    """Map anomaly types to OWASP categories (one entry per category).
+
+    Args:
+        anomalies: Detected log anomalies.
+
+    Returns:
+        List of vulnerability dicts linked to anomaly types.
+    """
     seen = set()
     vulns = []
     for a in anomalies:
@@ -56,6 +66,14 @@ def scan_for_owasp(anomalies: list[dict]) -> list[dict]:
 
 
 def check_api_headers(headers: dict) -> list[dict]:
+    """Flag missing recommended HTTP security response headers.
+
+    Args:
+        headers: Response header name → value mapping to inspect.
+
+    Returns:
+        List of missing-header findings with remediation text.
+    """
     missing = []
     for h in REQUIRED_HEADERS:
         if h not in headers:
@@ -70,6 +88,14 @@ def check_api_headers(headers: dict) -> list[dict]:
 
 
 def scan_github_code(state: SecurityState) -> dict:
+    """Run GitHub static analysis when ``github_repo`` is set in state.
+
+    Args:
+        state: Pipeline state; uses ``github_repo`` field.
+
+    Returns:
+        Scan result dict with languages, findings, and optional ``scan_error``.
+    """
     repo = state.get("github_repo", "")
     if not repo:
         return {
@@ -93,6 +119,7 @@ def scan_github_code(state: SecurityState) -> dict:
 
 
 def _compute_risk_level(vulns: list[dict]) -> str:
+    """Derive overall risk level from the highest vulnerability severity."""
     if any(v["severity"] == "CRITICAL" for v in vulns):
         return "critical"
     if any(v["severity"] == "HIGH" for v in vulns):
@@ -103,6 +130,14 @@ def _compute_risk_level(vulns: list[dict]) -> str:
 
 
 def run_vuln_scanner(state: SecurityState) -> SecurityState:
+    """Aggregate OWASP, header, and GitHub code findings into ``vulnerabilities``.
+
+    Args:
+        state: Pipeline state with anomalies and optional ``github_repo``.
+
+    Returns:
+        Updated state with vulnerabilities, risk level, and code scan metadata.
+    """
     owasp_vulns = scan_for_owasp(state["anomalies"])
     # HTTP header checks apply to web apps, not IaC repo scans
     header_vulns = [] if state.get("github_repo") else check_api_headers({})

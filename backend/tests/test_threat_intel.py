@@ -1,3 +1,5 @@
+"""Tests for Threat Intel CVE lookup and threat score calculation."""
+
 from unittest.mock import patch
 
 from agents.threat_intel import run_threat_intel

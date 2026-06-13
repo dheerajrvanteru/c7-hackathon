@@ -1,3 +1,5 @@
+"""Tests for GitHub URL parsing, static code scanning, and Terraform patterns."""
+
 from pathlib import Path
 from unittest.mock import patch
 

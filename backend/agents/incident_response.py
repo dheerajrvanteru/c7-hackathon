@@ -1,3 +1,5 @@
+"""Incident Response agent — LLM action plans with deterministic fallback."""
+
 import os
 import time
 
@@ -14,6 +16,15 @@ _llm = CachingLLMClient(
 
 
 def call_openai(prompt: str, session_id: str | None = None) -> str:
+    """Send the incident prompt to OpenRouter via the caching LLM client.
+
+    Args:
+        prompt: User message built from pipeline findings.
+        session_id: Optional session id for eval metric recording.
+
+    Returns:
+        Assistant response text from the LLM.
+    """
     messages = [
         {
             "role": "system",
@@ -41,6 +52,14 @@ def call_openai(prompt: str, session_id: str | None = None) -> str:
 
 
 def build_prompt(state: SecurityState) -> str:
+    """Format pipeline findings into a structured LLM prompt.
+
+    Args:
+        state: Full pipeline state with anomalies, CVEs, vulns, and code findings.
+
+    Returns:
+        Multi-section prompt string for the incident response LLM.
+    """
     anomaly_lines = "\n".join(
         f"- {a['type']} from {a.get('source_ip', '?')} ({a['severity']})"
         for a in state["anomalies"]
@@ -165,6 +184,16 @@ def _fallback_action_plan(state: SecurityState) -> list[str]:
 
 
 def run_incident_response(state: SecurityState) -> SecurityState:
+    """Generate an action plan and markdown runbook from all pipeline findings.
+
+    Uses the LLM when available; falls back to deterministic steps otherwise.
+
+    Args:
+        state: Pipeline state after Threat Intel and Vuln Scanner.
+
+    Returns:
+        Updated state with ``action_plan`` and ``runbook_md``.
+    """
     prompt = build_prompt(state)
     action_plan: list[str] = []
     try:

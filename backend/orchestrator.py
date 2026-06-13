@@ -1,3 +1,5 @@
+"""LangGraph orchestration for the five-agent security analysis pipeline."""
+
 from langgraph.graph import END, StateGraph
 import time
 
@@ -20,6 +22,16 @@ AGENTS = [
 
 
 def _wrap(agent_name: str, fn):
+    """Wrap an agent node with SSE events, latency tracking, and error handling.
+
+    Args:
+        agent_name: SSE identifier emitted to the dashboard.
+        fn: Agent function accepting and returning ``SecurityState``.
+
+    Returns:
+        LangGraph-compatible node callable.
+    """
+
     def node(state: SecurityState) -> SecurityState:
         session_id = state["session_id"]
         emit_sync(session_id, agent_name, "running")
@@ -39,6 +51,11 @@ def _wrap(agent_name: str, fn):
 
 
 def build_graph():
+    """Compile the linear LangGraph pipeline for all security agents.
+
+    Returns:
+        Compiled LangGraph application invokable with ``SecurityState``.
+    """
     graph = StateGraph(SecurityState)
     for name, fn in AGENTS:
         graph.add_node(name, _wrap(name, fn))
@@ -57,6 +74,17 @@ def run_analysis(
     session_id: str,
     github_repo: str = "",
 ) -> SecurityState:
+    """Execute the full agent pipeline synchronously.
+
+    Args:
+        logs: Raw log lines (empty for GitHub-only scans).
+        log_source: Source label stored in state and session metadata.
+        session_id: UUID for SSE and eval tracking.
+        github_repo: Optional ``owner/repo`` to scan via the Vuln Scanner.
+
+    Returns:
+        Final ``SecurityState`` after all agents complete.
+    """
     app = build_graph()
     initial = make_initial_state(
         raw_logs=logs,

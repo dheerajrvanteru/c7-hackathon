@@ -1,3 +1,5 @@
+"""Policy Checker agent — maps findings to NIST and SOC 2 compliance gaps."""
+
 from state import SecurityState
 
 NIST_MAP = {
@@ -40,6 +42,14 @@ SOC2_MAP = {
 
 
 def map_to_nist(anomalies: list[dict]) -> list[dict]:
+    """Map log anomalies to NIST CSF 2.0 control gaps.
+
+    Args:
+        anomalies: Detected anomalies from the Log Monitor.
+
+    Returns:
+        Deduplicated list of compliance gap dicts.
+    """
     seen, gaps = set(), []
     for a in anomalies:
         for control_id, desc in NIST_MAP.get(a["type"], []):
@@ -57,6 +67,14 @@ def map_to_nist(anomalies: list[dict]) -> list[dict]:
 
 
 def map_to_soc2(anomalies: list[dict]) -> list[dict]:
+    """Map log anomalies to SOC 2 Type II control gaps.
+
+    Args:
+        anomalies: Detected anomalies from the Log Monitor.
+
+    Returns:
+        Deduplicated list of compliance gap dicts.
+    """
     seen, gaps = set(), []
     for a in anomalies:
         for control_id, desc in SOC2_MAP.get(a["type"], []):
@@ -74,6 +92,14 @@ def map_to_soc2(anomalies: list[dict]) -> list[dict]:
 
 
 def map_code_findings_to_compliance(findings: list[dict]) -> list[dict]:
+    """Map GitHub code scan findings to NIST-style compliance gaps.
+
+    Args:
+        findings: Static analysis results from ``github_scanner``.
+
+    Returns:
+        One gap entry per unique code finding.
+    """
     gaps = []
     seen: set[str] = set()
     for f in findings:
@@ -93,6 +119,14 @@ def map_code_findings_to_compliance(findings: list[dict]) -> list[dict]:
 
 
 def run_policy_checker(state: SecurityState) -> SecurityState:
+    """Compute compliance gaps and score from anomalies and code findings.
+
+    Args:
+        state: Pipeline state with ``anomalies`` and optional ``code_findings``.
+
+    Returns:
+        Updated state with ``compliance_gaps`` and ``compliance_score``.
+    """
     anomalies = state["anomalies"]
     gaps = map_to_nist(anomalies) + map_to_soc2(anomalies)
 

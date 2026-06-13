@@ -1,3 +1,5 @@
+"""Tests for eval API endpoints."""
+
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient

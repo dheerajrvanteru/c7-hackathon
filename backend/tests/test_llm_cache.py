@@ -1,3 +1,5 @@
+"""Tests for in-memory LLM response cache behavior."""
+
 import time
 
 from llm_cache import LLMCache, CacheEntry

@@ -319,6 +319,7 @@ def parse_github_url(repo: str) -> tuple[str, str]:
 
 
 def _headers() -> dict[str, str]:
+    """Build GitHub REST API request headers, including optional auth token."""
     headers = {
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
@@ -330,6 +331,7 @@ def _headers() -> dict[str, str]:
 
 
 def _get(client: httpx.Client, path: str) -> dict | list:
+    """Perform an authenticated GET against the GitHub API."""
     resp = client.get(f"{GITHUB_API}{path}", headers=_headers(), timeout=20)
     resp.raise_for_status()
     return resp.json()
@@ -345,6 +347,7 @@ def fetch_repo_languages(client: httpx.Client, owner: str, repo: str) -> dict[st
 
 
 def fetch_default_branch(client: httpx.Client, owner: str, repo: str) -> str:
+    """Return the repository default branch name (usually ``main``)."""
     meta = _get(client, f"/repos/{owner}/{repo}")
     return meta.get("default_branch", "main")
 
@@ -356,6 +359,10 @@ def list_scannable_files(
     branch: str,
     languages: dict[str, float] | None = None,
 ) -> list[str]:
+    """List up to ``MAX_FILES`` source paths suitable for static analysis.
+
+    Prioritizes Terraform/HCL files when the repo is IaC-heavy.
+    """
     tree = _get(client, f"/repos/{owner}/{repo}/git/trees/{branch}?recursive=1")
     candidates: list[str] = []
     langs = languages or {}
@@ -388,6 +395,7 @@ def list_scannable_files(
 
 
 def fetch_file_content(client: httpx.Client, owner: str, repo: str, path: str) -> str:
+    """Download and decode a single file from the GitHub contents API."""
     data = _get(client, f"/repos/{owner}/{repo}/contents/{path}")
     if isinstance(data, list):
         return ""
@@ -398,6 +406,10 @@ def fetch_file_content(client: httpx.Client, owner: str, repo: str, path: str) -
 
 
 def scan_source_code(content: str, path: str, language: str) -> list[dict]:
+    """Run regex-based security patterns against file content.
+
+    Applies general code patterns plus Terraform rules for ``.tf``/``.hcl`` files.
+    """
     findings: list[dict] = []
     lines = content.splitlines()
     ext = os.path.splitext(path)[1].lower()
@@ -429,6 +441,7 @@ def scan_source_code(content: str, path: str, language: str) -> list[dict]:
 
 
 def _guess_language(path: str, repo_languages: dict[str, float]) -> str:
+    """Infer language from file extension, falling back to repo primary language."""
     ext = os.path.splitext(path)[1].lower()
     ext_map = {
         ".py": "Python",

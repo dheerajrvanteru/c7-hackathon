@@ -1,7 +1,15 @@
+"""Shared pipeline state definitions for the LangGraph security agents."""
+
 from typing import TypedDict
 
 
 class SecurityState(TypedDict):
+    """Accumulated inputs and outputs for a single analysis session.
+
+    Each agent reads from and returns an updated ``SecurityState`` as it runs
+    through the LangGraph pipeline.
+    """
+
     raw_logs: list[str]
     log_source: str
     session_id: str
@@ -29,6 +37,17 @@ def make_initial_state(
     session_id: str,
     github_repo: str = "",
 ) -> SecurityState:
+    """Create a fresh ``SecurityState`` with empty agent output fields.
+
+    Args:
+        raw_logs: Log lines to analyze (may be empty for code-only GitHub scans).
+        log_source: One of ``synthetic``, ``system``, ``upload``, or ``github``.
+        session_id: UUID for this analysis run.
+        github_repo: Optional ``owner/repo`` when scanning a GitHub repository.
+
+    Returns:
+        Initial state ready for the Log Monitor entry point.
+    """
     return SecurityState(
         raw_logs=raw_logs,
         log_source=log_source,
